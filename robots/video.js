@@ -4,7 +4,7 @@ const spawn = require('child_process').spawn
 const path = require('path')
 const rootPath = path.resolve(__dirname, '..')
 
-async function robot() {
+async function robot () {
   const content = state.load()
 
   await convertAllImages(content)
@@ -15,16 +15,30 @@ async function robot() {
 
   state.save(content)
 
-  async function convertAllImages(content) {
-    for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
+  async function convertAllImages (content) {
+    for (
+      let sentenceIndex = 0;
+      sentenceIndex < content.sentences.length;
+      sentenceIndex++
+    ) {
       await convertImage(sentenceIndex)
     }
   }
 
-  async function convertImage(sentenceIndex) {
+  async function convertImage (sentenceIndex) {
     return new Promise((resolve, reject) => {
-      const inputFile = path.resolve(__dirname, '..', 'content', `${sentenceIndex}-original.png[0]`)
-      const outputFile = path.resolve(__dirname, '..', 'content', `${sentenceIndex}-converted.png`)
+      const inputFile = path.resolve(
+        __dirname,
+        '..',
+        'content',
+        `${sentenceIndex}-original.png[0]`
+      )
+      const outputFile = path.resolve(
+        __dirname,
+        '..',
+        'content',
+        `${sentenceIndex}-converted.png`
+      )
       const width = 1920
       const height = 1080
 
@@ -48,7 +62,7 @@ async function robot() {
         .out('-compose', 'over')
         .out('-composite')
         .out('-extent', `${width}x${height}`)
-        .write(outputFile, (error) => {
+        .write(outputFile, error => {
           if (error) {
             return reject(error)
           }
@@ -56,19 +70,30 @@ async function robot() {
           console.log(`> Image converted: ${inputFile}`)
           resolve()
         })
-
     })
   }
 
-  async function createAllSentencesImages(content) {
-    for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
-      await createSentenceImage(sentenceIndex, content.sentences[sentenceIndex].text)
+  async function createAllSentencesImages (content) {
+    for (
+      let sentenceIndex = 0;
+      sentenceIndex < content.sentences.length;
+      sentenceIndex++
+    ) {
+      await createSentenceImage(
+        sentenceIndex,
+        content.sentences[sentenceIndex].text
+      )
     }
   }
 
-  async function createSentenceImage(sentenceIndex, senteceText) {
+  async function createSentenceImage (sentenceIndex, senteceText) {
     return new Promise((resolve, reject) => {
-      const outputFile = path.resolve(__dirname, '..', 'content', `${sentenceIndex}-sentence.png`)
+      const outputFile = path.resolve(
+        __dirname,
+        '..',
+        'content',
+        `${sentenceIndex}-sentence.png`
+      )
 
       const templateSettings = {
         0: {
@@ -108,7 +133,7 @@ async function robot() {
         .out('-fill', 'white')
         .out('-kerning', '-1')
         .out(`caption:${senteceText}`)
-        .write(outputFile, (error) => {
+        .write(outputFile, error => {
           if (error) {
             return reject(error)
           }
@@ -119,39 +144,46 @@ async function robot() {
     })
   }
 
-  async function createYouTubeThumbnail() {
+  async function createYouTubeThumbnail () {
     return new Promise((resolve, reject) => {
       gm()
         .in(path.resolve(__dirname, '..', 'content', '0-converted.png'))
-        .write(path.resolve(__dirname, '..', 'content', 'youtube-thumbnail.jpg'), (error) => {
-          if (error) {
-            return reject(error)
-          }
+        .write(
+          path.resolve(__dirname, '..', 'content', 'youtube-thumbnail.jpg'),
+          error => {
+            if (error) {
+              return reject(error)
+            }
 
-          console.log('> Creating YouTube thumbnail')
-        })
+            console.log('> Creating YouTube thumbnail')
+          }
+        )
     })
   }
 
-  async function createAfterEffectsScript(content){
+  async function createAfterEffectsScript (content) {
     await state.saveScript(content)
   }
 
-  async function renderVideoWithAfterEffects(){
+  async function renderVideoWithAfterEffects () {
     return new Promise((resolve, reject) => {
-      const aerenderFilePath = 'Applications/Adobe After Effects CC 2019/aerender'
+      const aerenderFilePath =
+        'Applications/Adobe After Effects CC 2019/aerender'
       const templateFilePath = `${rootPath}/templates/1/template.aep`
       const destinationFilePath = `${rootPath}/content/output.mov`
 
       console.log('> Starting After Effects')
 
       const aerender = spawn(aerenderFilePath, [
-        '-comp', 'main',
-        '-project', templateFilePath,
-        '-output', destinationFilePath
+        '-comp',
+        'main',
+        '-project',
+        templateFilePath,
+        '-output',
+        destinationFilePath
       ])
 
-      aerender.stdout.on('data', (data) => {
+      aerender.stdout.on('data', data => {
         process.stdout.write(data)
       })
 
